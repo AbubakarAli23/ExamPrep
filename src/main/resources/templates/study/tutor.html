@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — AI tutor')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / AI tutor</p>
+            <h1>AI tutor</h1>
+            <p class="muted">Ask about this document. The tutor answers from retrieved passages and shows the pages it used.</p>
+        </div>
+
+        <div class="alert" role="alert" th:if="${!aiConfigured}">
+            The Gemini API key is not configured on this server, so the tutor is unavailable.
+            Set <span class="mono">GOOGLE_API_KEY</span> and restart the application.
+        </div>
+
+        <div class="tutor-layout">
+            <div>
+                <div class="tutor-thread" id="tutor-thread" aria-live="polite">
+                    <div class="empty" th:if="${#lists.isEmpty(messages)}">
+                        <h3>Start with a question</h3>
+                        <p>For example: “Explain the difference between these two concepts using my notes.”</p>
+                    </div>
+                    <article class="tutor-message"
+                             th:each="message : ${messages}"
+                             th:classappend="${message.role() == 'USER'} ? 'is-user'">
+                        <span class="tutor-role" th:text="${message.role() == 'USER'} ? 'You' : 'Tutor'">Tutor</span>
+                        <p class="tutor-text" th:text="${message.content()}">Answer</p>
+                        <div class="tutor-sources" th:if="${!#lists.isEmpty(message.sourceReferences())}">
+                            <span class="source-tag" th:each="reference : ${message.sourceReferences()}"
+                                  th:text="${reference}">Page 3</span>
+                        </div>
+                        <span class="small muted" th:text="${message.createdAtLabel()}" th:if="${message.createdAtLabel() != null}">Time</span>
+                    </article>
+                </div>
+
+                <form class="tutor-form" th:action="@{/study/{id}/tutor(id=${pack.studyPackId()})}" method="post">
+                    <div class="field">
+                        <label for="question">Your question</label>
+                        <textarea id="question" name="question" maxlength="2000" required
+                                  placeholder="Explain this topic in simple language…"></textarea>
+                        <p class="field-hint">The tutor uses this document only. It will say when the material does not cover something.</p>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="button" th:disabled="${!aiConfigured}">Ask the tutor</button>
+                        <span class="small muted">Your conversation is saved with this study package.</span>
+                    </div>
+                </form>
+            </div>
+
+            <aside class="tutor-aside">
+                <h2>Useful prompts</h2>
+                <ul>
+                    <li>Explain this topic in simple language.</li>
+                    <li>What is the difference between these two concepts?</li>
+                    <li>Give me an example based on these notes.</li>
+                    <li>Explain the process step by step.</li>
+                    <li>Create another practice question about this topic.</li>
+                </ul>
+                <p class="small" style="margin-top:1rem;">
+                    The tutor is a study aid. It cites only the pages and slides it was given, and it does not search the web.
+                </p>
+            </aside>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+<script>
+    (function () {
+        var thread = document.getElementById("tutor-thread");
+        if (thread) {
+            thread.scrollTop = thread.scrollHeight;
+        }
+    })();
+</script>
+</body>
+</html>

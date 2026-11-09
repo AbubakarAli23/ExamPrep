@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${title != null ? title : 'Something went wrong'})}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: publicNavbar}"></header>
+
+<main id="main" class="wrap error-page">
+    <div class="error-card">
+        <span class="error-code" th:text="|Error ${status != null ? status : 500}|">Error 500</span>
+        <h1 th:text="${title != null ? title : 'Something went wrong'}">Something went wrong</h1>
+        <p th:text="${message != null ? message : 'ExamPrep could not complete that request.'}">
+            ExamPrep could not complete that request.
+        </p>
+        <p class="small muted" th:if="${path != null}" th:text="|Request: ${path}|">Request path</p>
+        <div class="button-row" style="justify-content:center;">
+            <a class="button" th:href="@{/dashboard}">Go to dashboard</a>
+            <a class="button button--secondary" th:href="@{/}">Home</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — Topics')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / Topics</p>
+            <h1>Topics</h1>
+            <p class="muted">The major topics in this document, each explained and linked back to its source.</p>
+        </div>
+
+        <div class="empty" th:if="${#lists.isEmpty(pack.topics())}">
+            <h3>No topics were generated</h3>
+            <p>This can happen when the extracted material is very short. Try a more detailed document.</p>
+        </div>
+
+        <article class="topic-card" th:each="topic, topicStat : ${pack.topics()}">
+            <span class="topic-index" th:text="|Topic ${topicStat.count}|">Topic 1</span>
+            <h2 th:text="${topic.name()}">Topic name</h2>
+            <p th:text="${topic.explanation()}" style="color: var(--ink-soft); white-space: pre-line;">Explanation</p>
+            <div th:if="${!#lists.isEmpty(topic.keyConcepts())}">
+                <h3 style="font-size:0.95rem;">Key concepts</h3>
+                <ul class="concept-list">
+                    <li th:each="concept : ${topic.keyConcepts()}" th:text="${concept}">Concept</li>
+                </ul>
+            </div>
+            <div th:if="${!#lists.isEmpty(topic.sourceReferences())}">
+                <span class="source-tag" th:each="reference : ${topic.sourceReferences()}" th:text="${reference}">Page 3</span>
+            </div>
+        </article>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

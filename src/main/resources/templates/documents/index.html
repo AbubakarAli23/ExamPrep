@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Documents')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap page">
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">Source material</span>
+            <h1>Your documents</h1>
+            <p>Upload an academic document. ExamPrep extracts the text and keeps page or slide references wherever they really exist.</p>
+        </div>
+    </div>
+
+    <section class="panel" aria-labelledby="upload-heading">
+        <div class="panel-head">
+            <h2 id="upload-heading">Upload a document</h2>
+            <span class="small muted" th:text="|Maximum ${maxUploadMb} MB per file|">Maximum 25 MB</span>
+        </div>
+
+        <form id="upload-form" th:action="@{/documents/upload}" method="post" enctype="multipart/form-data">
+            <div class="upload-zone" id="upload-zone">
+                <h3>Drop a file here, or choose one</h3>
+                <p>Lecture notes, handouts, textbook chapters, presentations and plain text.</p>
+                <label class="button button--secondary" for="document-file">Choose file</label>
+                <input type="file" id="document-file" name="file" required
+                       accept=".pdf,.docx,.doc,.pptx,.ppt,.txt,.md,.markdown,.rtf,.odt,.odp">
+                <p class="upload-formats">PDF, DOCX, DOC, PPTX, PPT, TXT, Markdown, RTF, ODT, ODP</p>
+                <p class="upload-formats" id="selected-file" aria-live="polite"></p>
+            </div>
+
+            <div class="upload-progress" id="upload-progress" hidden>
+                <div class="progress"><span id="upload-bar-fill"></span></div>
+                <p id="upload-status" role="status">Preparing upload…</p>
+            </div>
+
+            <noscript>
+                <p class="field-hint">JavaScript is disabled, so the upload will use a normal page submission.</p>
+            </noscript>
+
+            <div class="form-actions">
+                <button type="submit" class="button" id="upload-submit">Upload document</button>
+                <span class="small muted">Your file is stored privately and never served from a public URL.</span>
+            </div>
+        </form>
+    </section>
+
+    <section style="margin-top: 2rem;" aria-labelledby="documents-heading">
+        <div class="panel-head">
+            <h2 id="documents-heading">Document library</h2>
+            <span class="small muted" th:text="|${#lists.size(documents)} document(s)|">0 documents</span>
+        </div>
+
+        <div class="empty" th:if="${#lists.isEmpty(documents)}">
+            <h3>Nothing uploaded yet</h3>
+            <p>Start with the material you are actually examined on: lecture notes, a chapter, or a slide deck.</p>
+        </div>
+
+        <div class="stack" th:unless="${#lists.isEmpty(documents)}">
+            <article class="panel" th:each="doc : ${documents}"
+                     th:attr="data-document-id=${doc.documentId()},data-document-status=${doc.status()}"
+                     th:classappend="${doc.status() == 'FAILED'} ? 'panel--failed'">
+                <div class="panel-head">
+                    <div>
+                        <h3 th:text="${doc.originalFilename()}" style="margin-bottom:0.2rem;">notes.pdf</h3>
+                        <span class="small muted"
+                              th:text="|${doc.sizeLabel()} · Uploaded ${doc.createdAtLabel()}|">1.2 MB</span>
+                    </div>
+                    <span class="pill document-status"
+                          th:classappend="${doc.status() == 'READY'} ? 'pill--ready' : (${doc.status() == 'FAILED'} ? 'pill--failed' : 'pill--busy')"
+                          th:text="${doc.status()}">READY</span>
+                </div>
+
+                <div class="alert document-error" role="alert" th:if="${doc.status() == 'FAILED'}"
+                     th:text="${doc.failureReason()}">Extraction failed.</div>
+
+                <p class="small muted document-status-message" th:if="${doc.status() == 'UPLOADED' or doc.status() == 'PROCESSING'}">
+                    Reading the document. This page updates automatically.
+                </p>
+
+                <div class="meta-list" th:if="${doc.status() == 'READY'}" style="margin-bottom:1rem;">
+                    <span class="small muted">
+                        <span th:if="${doc.pageCount() != null}" th:text="|${doc.pageCount()} pages · |"></span>
+                        <span th:text="|${doc.chunkCount()} source sections indexed|">12 source sections indexed</span>
+                    </span>
+                </div>
+
+                <div th:if="${doc.status() == 'READY'}">
+                    <details>
+                        <summary class="small" style="cursor:pointer;color:var(--accent);">Generate a study package</summary>
+                        <form th:action="@{/documents/{id}/study-packages(id=${doc.documentId()})}" method="post"
+                              style="margin-top:1rem;">
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label th:for="'language-' + ${doc.documentId()}">Explanation language</label>
+                                    <select th:id="'language-' + ${doc.documentId()}" name="language">
+                                        <option value="English" selected>English</option>
+                                        <option value="Afrikaans">Afrikaans</option>
+                                        <option value="isiZulu">isiZulu</option>
+                                        <option value="French">French</option>
+                                        <option value="Spanish">Spanish</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label th:for="'level-' + ${doc.documentId()}">Academic level</label>
+                                    <select th:id="'level-' + ${doc.documentId()}" name="academicLevel">
+                                        <option value="Undergraduate" selected>Undergraduate</option>
+                                        <option value="Honours">Honours</option>
+                                        <option value="Postgraduate">Postgraduate</option>
+                                        <option value="Professional">Professional</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label th:for="'exam-date-' + ${doc.documentId()}">Exam date (optional)</label>
+                                    <input type="date" th:id="'exam-date-' + ${doc.documentId()}" name="examDate">
+                                </div>
+                                <div class="field">
+                                    <label th:for="'practice-' + ${doc.documentId()}">Practice questions</label>
+                                    <input type="number" min="5" max="30" step="1" value="12"
+                                           th:id="'practice-' + ${doc.documentId()}" name="practiceQuestionCount">
+                                </div>
+                                <div class="field">
+                                    <label th:for="'mock-' + ${doc.documentId()}">Mock exam questions</label>
+                                    <input type="number" min="5" max="25" step="1" value="10"
+                                           th:id="'mock-' + ${doc.documentId()}" name="mockQuestionCount">
+                                </div>
+                                <div class="field">
+                                    <label th:for="'cards-' + ${doc.documentId()}">Flashcards</label>
+                                    <input type="number" min="5" max="40" step="1" value="16"
+                                           th:id="'cards-' + ${doc.documentId()}" name="flashcardCount">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="button">Generate study package</button>
+                                <span class="small muted">Generation runs in the background; you can leave this page.</span>
+                            </div>
+                        </form>
+                    </details>
+                </div>
+
+                <div class="form-actions" style="margin-top:1rem;">
+                    <form th:action="@{/documents/{id}/delete(id=${doc.documentId()})}" method="post"
+                          data-confirm="Delete this document and every study package generated from it?">
+                        <button type="submit" class="button button--danger button--small">Delete document</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+<script th:src="@{/js/upload.js}" defer></script>
+</body>
+</html>

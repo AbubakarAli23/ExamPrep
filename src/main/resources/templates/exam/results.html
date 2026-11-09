@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Examination results')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap page">
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">Examination results</span>
+            <h1 th:text="${result.studyPackTitle()}">Study package</h1>
+            <p th:text="|Submitted ${result.submittedAtLabel()}|">Submitted</p>
+        </div>
+        <div class="button-row">
+            <a class="button button--secondary" th:href="@{/study/{id}/exam(id=${result.studyPackId()})}">Back to mock exams</a>
+            <a class="button" th:href="@{/study/{id}(id=${result.studyPackId()})}">Open study package</a>
+        </div>
+    </div>
+
+    <section class="score-banner" aria-labelledby="score-summary">
+        <div>
+            <span class="stat-label">Score</span>
+            <p class="score-figure" style="margin:0;" th:text="|${result.scorePercent()}%|">80%</p>
+        </div>
+        <div>
+            <h2 id="score-summary" style="font-size:1.2rem;margin-bottom:0.35rem;"
+                th:text="${result.feedbackHeadline()}">Solid attempt.</h2>
+            <p class="small muted" style="margin-bottom:0.8rem;">
+                Automatically scored questions only. Short answers are shown with a suggested answer below.
+            </p>
+            <ul class="meta-list">
+                <li>
+                    <dt>Correct answers</dt>
+                    <dd th:text="|${result.correctCount()} / ${result.gradableQuestions()}|">8 / 10</dd>
+                </li>
+                <li>
+                    <dt>Questions in paper</dt>
+                    <dd th:text="${result.totalQuestions()}">10</dd>
+                </li>
+                <li>
+                    <dt>Time taken</dt>
+                    <dd th:text="${result.durationLabel()}">14 min 20 s</dd>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="panel" aria-labelledby="revision-areas" style="margin-top:1.4rem;" th:if="${!#lists.isEmpty(result.revisionAreas())}">
+        <h2 id="revision-areas" style="font-size:1.2rem;">Areas to revise</h2>
+        <p class="small muted">These source locations contained questions you answered incorrectly.</p>
+        <span class="source-tag" th:each="reference : ${result.revisionAreas()}" th:text="${reference}">Page 5</span>
+        <p style="margin-top:0.8rem;">
+            <a th:href="@{/study/{id}/notes(id=${result.studyPackId()})}">Return to the revision notes</a>
+        </p>
+    </section>
+
+    <section style="margin-top:2rem;" aria-labelledby="review-heading">
+        <div class="section-title">
+            <h2 id="review-heading" style="font-size:1.4rem;">Question review</h2>
+            <span class="small muted" th:text="|${#lists.size(result.results())} questions|">10 questions</span>
+        </div>
+
+        <article class="result-question"
+                 th:each="item : ${result.results()}"
+                 th:classappend="${item.correct() == null} ? 'is-manual' : (${item.correct()} ? 'is-correct' : 'is-wrong')">
+            <div class="question-meta">
+                <span th:text="|Question ${item.position()}|">Question 1</span>
+                <span th:text="${#strings.replace(item.type(), '_', ' ')}">MULTIPLE CHOICE</span>
+                <span th:text="${item.difficulty()}">MEDIUM</span>
+                <span class="source-tag" th:if="${item.sourceReference() != null}" th:text="${item.sourceReference()}">Page 5</span>
+            </div>
+            <p class="question-prompt" th:text="${item.prompt()}">Prompt</p>
+
+            <ol class="option-list" th:if="${!#lists.isEmpty(item.options())}">
+                <li th:each="option : ${item.options()}" th:text="${option}">Option</li>
+            </ol>
+
+            <p class="answer-line answer-line--wrong" th:if="${item.correct() != null and !item.correct()}">
+                <strong>Your answer:</strong>
+                <span th:text="${item.submittedAnswer() != null ? item.submittedAnswer() : 'Not answered'}">Wrong</span>
+            </p>
+            <p class="answer-line answer-line--right" th:if="${item.correct() != null and item.correct()}">
+                <strong>Your answer:</strong>
+                <span th:text="${item.submittedAnswer()}">Right</span>
+            </p>
+            <p class="answer-line" th:if="${item.correct() == null}">
+                <strong>Your answer:</strong>
+                <span th:text="${item.submittedAnswer() != null ? item.submittedAnswer() : 'Not answered'}">Answer</span>
+            </p>
+
+            <p class="answer-line answer-line--right">
+                <strong th:text="${item.correct() == null} ? 'Suggested answer:' : 'Correct answer:'">Correct answer:</strong>
+                <span th:text="${item.correctAnswer()}">Answer</span>
+            </p>
+
+            <p class="small" th:if="${item.explanation() != null}" th:text="${item.explanation()}"
+               style="color:var(--ink-soft);margin:0.6rem 0 0;">Explanation</p>
+            <p class="small muted" th:if="${item.correct() == null}" style="margin:0.5rem 0 0;">
+                Short answers are not scored automatically. Compare your response with the suggested answer.
+            </p>
+        </article>
+    </section>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — Revision notes')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / Revision notes</p>
+            <h1>Revision notes</h1>
+            <p class="muted">Exam-ready notes built from this document only. Read the source references to verify details.</p>
+        </div>
+
+        <div class="empty" th:if="${#lists.isEmpty(pack.revisionNotes())}">
+            <h3>No revision notes were generated</h3>
+            <p>Regenerate the study package from a document with more extractable text.</p>
+        </div>
+
+        <section class="note-section" th:each="note, noteStat : ${pack.revisionNotes()}">
+            <span class="topic-index" th:text="|Section ${noteStat.count}|">Section 1</span>
+            <h2 th:text="${note.heading()}" style="font-size:1.35rem;">Heading</h2>
+            <p class="note-body" th:text="${note.body()}">Body</p>
+            <div th:if="${!#lists.isEmpty(note.sourceReferences())}">
+                <span class="source-tag" th:each="reference : ${note.sourceReferences()}" th:text="${reference}">Page 2</span>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

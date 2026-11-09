@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — Formulas')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / Formulas</p>
+            <h1>Formulas and key facts</h1>
+            <p class="muted">Only formulas, rules and equations that appear in your document are listed here.</p>
+        </div>
+
+        <div class="empty" th:if="${#lists.isEmpty(pack.formulas())}">
+            <h3>No formulas were found in this document</h3>
+            <p>ExamPrep does not invent formulas. If your material contains equations that were not extracted, they may be stored as images.</p>
+        </div>
+
+        <div class="formula-grid" th:unless="${#lists.isEmpty(pack.formulas())}">
+            <article class="formula-card" th:each="formula : ${pack.formulas()}">
+                <h2 style="font-size:1.05rem;" th:text="${formula.name()}">Name</h2>
+                <code class="formula-expression" th:text="${formula.expression()}">x = y</code>
+                <p class="small" th:if="${formula.explanation() != null}" th:text="${formula.explanation()}">Explanation</p>
+                <span class="source-tag" th:if="${formula.sourceReference() != null}"
+                      th:text="${formula.sourceReference()}">Page 7</span>
+            </article>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

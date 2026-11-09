@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Exam preparation from your own course material')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: publicNavbar}"></header>
+
+<main id="main">
+    <section class="hero">
+        <div class="wrap hero-grid">
+            <div>
+                <span class="eyebrow">AI examination preparation</span>
+                <h1>Turn your course material into an exam-ready workspace.</h1>
+                <p class="hero-lede">
+                    Upload your lecture notes, handouts or slide decks. ExamPrep reads the document,
+                    then builds revision notes, definitions, flashcards, practice questions and a timed
+                    mock examination from that material — with source references back to your pages.
+                </p>
+                <div class="button-row">
+                    <a class="button" th:href="@{/register}">Create your account</a>
+                    <a class="button button--secondary" th:href="@{/login}">Sign in</a>
+                </div>
+                <p class="hero-note">
+                    ExamPrep is a study aid, not a replacement for your course. Always check generated
+                    material against the original document and your lecturer's guidance.
+                </p>
+            </div>
+            <aside class="workspace-preview" aria-label="How a study package is organised">
+                <div class="workspace-preview-head">
+                    <span>Study package</span>
+                    <span>From one document</span>
+                </div>
+                <ol class="preview-steps">
+                    <li><span class="preview-index">1</span><span><strong>Document overview</strong><br>Summary, objectives and revision priorities</span></li>
+                    <li><span class="preview-index">2</span><span><strong>Topics and notes</strong><br>Structured explanations with page references</span></li>
+                    <li><span class="preview-index">3</span><span><strong>Definitions and formulas</strong><br>A glossary drawn only from your material</span></li>
+                    <li><span class="preview-index">4</span><span><strong>Flashcards and practice</strong><br>Reveal answers, then test yourself</span></li>
+                    <li><span class="preview-index">5</span><span><strong>Mock examination</strong><br>Timed, scored, with explanations</span></li>
+                    <li><span class="preview-index">6</span><span><strong>AI tutor</strong><br>Ask questions grounded in your document</span></li>
+                </ol>
+                <p class="preview-foot">Supported: PDF, DOCX, PPTX, TXT, Markdown, RTF, ODT and ODP.</p>
+            </aside>
+        </div>
+    </section>
+
+    <section class="section" id="how-it-works">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="eyebrow">How it works</span>
+                <h2>Four steps from a handout to a revision routine.</h2>
+                <p>ExamPrep keeps the workflow deliberately small. Your document is the source; everything else is built from it.</p>
+            </div>
+            <div class="step-grid">
+                <article class="step">
+                    <span class="step-number">01</span>
+                    <h3>Upload</h3>
+                    <p>Choose a supported academic document. The file is validated and stored privately, outside any public URL.</p>
+                </article>
+                <article class="step">
+                    <span class="step-number">02</span>
+                    <h3>Extract</h3>
+                    <p>Text is extracted with page and slide references where they genuinely exist. Scanned PDFs are reported clearly instead of guessed.</p>
+                </article>
+                <article class="step">
+                    <span class="step-number">03</span>
+                    <h3>Generate</h3>
+                    <p>Gemini analyses the extracted material in bounded sections and assembles a complete study package.</p>
+                </article>
+                <article class="step">
+                    <span class="step-number">04</span>
+                    <h3>Study</h3>
+                    <p>Revise, flip flashcards, answer practice questions, sit a timed mock exam and ask the tutor about the same material.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="study-tools">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="eyebrow">Study tools</span>
+                <h2>A complete package, not a single summary.</h2>
+                <p>Each study package is organised the way revision actually happens: understand, recall, practise, then test under time pressure.</p>
+            </div>
+            <ul class="feature-list">
+                <li>
+                    <h3>Revision notes</h3>
+                    <p>Organised, readable notes that preserve the technical meaning of the original material.</p>
+                </li>
+                <li>
+                    <h3>Definitions and formulas</h3>
+                    <p>A glossary of terms and a reference section for formulas that actually appear in your document.</p>
+                </li>
+                <li>
+                    <h3>Flashcards</h3>
+                    <p>Front-and-back cards for active recall, with next, previous and reveal controls.</p>
+                </li>
+                <li>
+                    <h3>Practice questions</h3>
+                    <p>Multiple choice, true/false and short answer questions with suggested answers and explanations.</p>
+                </li>
+                <li>
+                    <h3>Timed mock examination</h3>
+                    <p>A countdown, automatic scoring and a full review of what went wrong. Answers stay on the server until you submit.</p>
+                </li>
+                <li>
+                    <h3>Tutor with sources</h3>
+                    <p>Ask about a concept and see which pages or slides the answer came from. When the material is silent, it says so.</p>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="section" id="privacy">
+        <div class="wrap grid grid--2">
+            <div>
+                <span class="eyebrow">Privacy and responsibility</span>
+                <h2>Your documents stay private to your account.</h2>
+                <p class="muted">
+                    Uploaded files are stored outside the public web root, behind per-student ownership checks.
+                    You can delete a document and its study packages at any time from your workspace.
+                </p>
+                <p class="muted">
+                    To generate study material, the extracted text is sent to Google's Gemini API. ExamPrep never
+                    exposes your API key or your documents to the browser, and it does not log document contents.
+                </p>
+            </div>
+            <aside class="callout">
+                <h3>Built for honest study</h3>
+                <p class="muted">
+                    Generated content is educational assistance. ExamPrep labels what came from your document,
+                    discards citations that do not match a real page or slide, and refuses to invent formulas.
+                    Check anything important against your original notes.
+                </p>
+                <a class="button" th:href="@{/register}">Start studying</a>
+            </aside>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

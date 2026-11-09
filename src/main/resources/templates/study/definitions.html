@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — Definitions')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / Definitions</p>
+            <h1>Definitions</h1>
+            <p class="muted">A glossary of terms defined in your document. Terms that the document does not define are not listed.</p>
+        </div>
+
+        <div class="empty" th:if="${#lists.isEmpty(pack.definitions())}">
+            <h3>No definitions were found</h3>
+            <p>The document may not define individual terms, or the extracted text may not contain a glossary.</p>
+        </div>
+
+        <dl class="glossary" th:unless="${#lists.isEmpty(pack.definitions())}">
+            <div class="glossary-item" th:each="definition : ${pack.definitions()}">
+                <dt class="glossary-term" th:text="${definition.term()}">Term</dt>
+                <dd class="glossary-definition">
+                    <span th:text="${definition.definition()}">Definition</span>
+                    <span class="source-tag" th:if="${definition.sourceReference() != null}"
+                          th:text="${definition.sourceReference()}">Page 4</span>
+                </dd>
+            </div>
+        </dl>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

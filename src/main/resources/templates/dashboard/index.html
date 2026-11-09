@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Dashboard')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap page">
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">Your workspace</span>
+            <h1 th:text="|Good to see you, ${firstName}.|">Good to see you.</h1>
+            <p>Upload a document to begin, or continue with a study package you already generated.</p>
+        </div>
+        <a class="button" th:href="@{/documents}">Upload a document</a>
+    </div>
+
+    <section aria-labelledby="progress-heading">
+        <h2 id="progress-heading" class="visually-hidden">Study progress</h2>
+        <div class="stat-grid">
+            <div class="stat">
+                <span class="stat-label">Documents</span>
+                <span class="stat-value" th:text="${progress.documents()}">0</span>
+                <span class="stat-note">Files in your workspace</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Study packages</span>
+                <span class="stat-value" th:text="${progress.studyPackages()}">0</span>
+                <span class="stat-note">Generated from your material</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Mock exams</span>
+                <span class="stat-value" th:text="${progress.completedExams()}">0</span>
+                <span class="stat-note" th:if="${progress.averageScorePercent() != null}"
+                      th:text="|Average ${progress.averageScorePercent()}%|">Average</span>
+                <span class="stat-note" th:if="${progress.averageScorePercent() == null}">No submitted attempts yet</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Flashcards reviewed</span>
+                <span class="stat-value" th:text="${progress.flashcardsReviewed()}">0</span>
+                <span class="stat-note" th:if="${progress.bestScorePercent() != null}"
+                      th:text="|Best exam score ${progress.bestScorePercent()}%|">Best score</span>
+                <span class="stat-note" th:if="${progress.bestScorePercent() == null}">Tracked from flashcard sessions</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid grid--2" style="margin-top: 2rem;">
+        <section class="panel" aria-labelledby="recent-documents">
+            <div class="panel-head">
+                <h2 id="recent-documents">Recent documents</h2>
+                <a class="small" th:href="@{/documents}">All documents</a>
+            </div>
+            <div class="empty" th:if="${#lists.isEmpty(documents)}">
+                <h3>No documents yet</h3>
+                <p>Upload lecture notes, a textbook chapter or a slide deck. ExamPrep supports PDF, DOCX, PPTX and more.</p>
+                <a class="button button--small" th:href="@{/documents}">Upload your first document</a>
+            </div>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(documents)}">
+                <table class="data">
+                    <thead>
+                    <tr><th scope="col">Document</th><th scope="col">Status</th><th scope="col"></th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="doc : ${documents}">
+                        <td>
+                            <span class="table-title" th:text="${doc.originalFilename()}">notes.pdf</span>
+                            <span class="table-meta" th:text="|${doc.sizeLabel()} · ${doc.createdAtLabel()}|">1.2 MB</span>
+                        </td>
+                        <td>
+                            <span class="pill"
+                                  th:classappend="${doc.status() == 'READY'} ? 'pill--ready' : (${doc.status() == 'FAILED'} ? 'pill--failed' : 'pill--busy')"
+                                  th:text="${doc.status()}">READY</span>
+                        </td>
+                        <td class="actions"><a class="small" th:href="@{/documents}">Open</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel" aria-labelledby="recent-packages">
+            <div class="panel-head">
+                <h2 id="recent-packages">Recent study packages</h2>
+            </div>
+            <div class="empty" th:if="${#lists.isEmpty(studyPackages)}">
+                <h3>No study packages yet</h3>
+                <p>Once a document has been read, generate a study package to get notes, flashcards, questions and a mock exam.</p>
+            </div>
+            <ul class="meta-list" th:unless="${#lists.isEmpty(studyPackages)}" style="list-style:none;padding:0;">
+                <li th:each="pack : ${studyPackages}">
+                    <span>
+                        <a th:href="@{/study/{id}(id=${pack.studyPackId()})}" th:text="${pack.title()}">Study package</a>
+                        <span class="table-meta" th:text="|${pack.documentTitle()} · ${pack.createdAtLabel()}|">document.pdf</span>
+                    </span>
+                    <span class="pill"
+                          th:classappend="${pack.status() == 'READY'} ? 'pill--ready' : (${pack.status() == 'FAILED'} ? 'pill--failed' : 'pill--busy')"
+                          th:text="${pack.status()}">READY</span>
+                </li>
+            </ul>
+        </section>
+    </div>
+
+    <section class="panel" aria-labelledby="recent-scores" style="margin-top: 1.4rem;">
+        <div class="panel-head">
+            <h2 id="recent-scores">Recent examination scores</h2>
+        </div>
+        <div class="empty" th:if="${#lists.isEmpty(attempts)}">
+            <h3>No mock examinations submitted</h3>
+            <p>When you sit a mock exam, your score and time taken are recorded here.</p>
+        </div>
+        <div class="table-wrap" th:unless="${#lists.isEmpty(attempts)}">
+            <table class="data">
+                <thead>
+                <tr>
+                    <th scope="col">Study package</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Correct</th>
+                    <th scope="col">Time taken</th>
+                    <th scope="col">Submitted</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="attempt : ${attempts}">
+                    <td th:text="${attempt.studyPackTitle()}">Package</td>
+                    <td><strong th:text="|${attempt.scorePercent()}%|">80%</strong></td>
+                    <td th:text="|${attempt.correctCount()} / ${attempt.gradableQuestions()}|">8 / 10</td>
+                    <td th:text="${attempt.durationLabel()}">12 min 30 s</td>
+                    <td th:text="${attempt.submittedAtLabel()}">1 Nov 2026</td>
+                    <td class="actions">
+                        <a class="small" th:href="@{/exams/{id}/results(id=${attempt.attemptId()})}">Review</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

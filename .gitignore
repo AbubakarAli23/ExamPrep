@@ -1,0 +1,23 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Local runtime data
+data/
+uploads/
+logs/
+
+# Secrets
+.env
+.env.local
+*.env.local
+!.env.example
+
+# IDE and OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Test output
+*.log

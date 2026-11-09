@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — Flashcards')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / Flashcards</p>
+            <h1>Flashcards</h1>
+            <p class="muted">Reveal the answer only after you have tried to recall it.</p>
+        </div>
+
+        <div class="empty" th:if="${#lists.isEmpty(cards)}">
+            <h3>No flashcards in this package</h3>
+            <p>Regenerate the study package to create a new set of cards.</p>
+        </div>
+
+        <div class="flashcard-shell" th:unless="${#lists.isEmpty(cards)}">
+            <div id="flashcard-deck" class="flashcard-deck" data-count="0">
+                <article class="flashcard-slide" th:each="card, cardStat : ${cards}"
+                         th:attr="data-index=${cardStat.index}">
+                    <p class="flashcard-label"
+                       th:text="|Card ${card.position()} of ${#lists.size(cards)}|">Card 1 of 10</p>
+                    <p class="flashcard-front" th:text="${card.front()}">Question</p>
+                    <div class="flashcard-back">
+                        <p class="flashcard-answer" th:text="${card.back()}">Answer</p>
+                        <span class="source-tag" th:if="${card.sourceReference() != null}"
+                              th:text="${card.sourceReference()}">Page 3</span>
+                    </div>
+                </article>
+            </div>
+
+            <div class="flashcard-controls">
+                <button type="button" class="button button--secondary button--small" id="flashcard-prev">Previous</button>
+                <button type="button" class="button" id="flashcard-reveal">Reveal answer</button>
+                <button type="button" class="button button--secondary button--small" id="flashcard-next">Next</button>
+                <span class="flashcard-counter" id="flashcard-counter">1 / 10</span>
+            </div>
+
+            <p class="deck-status" id="flashcard-status" role="status">Use reveal, then move to the next card.</p>
+
+            <div class="panel panel--sunk" style="margin-top:1.5rem;">
+                <h2 style="font-size:1rem;">Finished this review?</h2>
+                <p class="small muted">Recording a session adds to your study progress. It does not change your notes.</p>
+                <div class="button-row">
+                    <form th:action="@{/study/{id}/flashcards/review(id=${pack.studyPackId()})}" method="post" id="flashcard-review-form">
+                        <input type="hidden" name="count" th:value="${#lists.size(cards)}">
+                        <button type="submit" class="button button--secondary button--small">Record review</button>
+                    </form>
+                    <a class="button button--quiet button--small" th:href="@{/study/{id}/practice(id=${pack.studyPackId()})}">Go to practice questions</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+<script th:src="@{/js/flashcards.js}" defer></script>
+</body>
+</html>

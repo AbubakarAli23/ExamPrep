@@ -1,0 +1,13 @@
+spring:
+  main:
+    banner-mode: off
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    root: WARN
+    com.examprep: INFO
+    org.flywaydb: WARN
+    org.hibernate: WARN
+    org.springframework.test: WARN

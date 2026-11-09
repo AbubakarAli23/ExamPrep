@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Mock examination')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+
+<main id="main" class="wrap exam-shell">
+    <div class="exam-bar">
+        <div class="exam-bar-inner">
+            <div>
+                <p class="eyebrow" style="margin-bottom:0.15rem;">Mock examination</p>
+                <h1 class="exam-title" th:text="${exam.studyPackTitle()}">Study package</h1>
+            </div>
+            <div class="exam-bar-inner" style="gap:0.8rem;">
+                <span class="small muted" th:text="|${exam.totalQuestions()} questions|">10 questions</span>
+                <span class="exam-timer" id="exam-timer" data-deadline="${deadlineEpochMillis}" role="timer"
+                      aria-live="off">--:--</span>
+                <button type="submit" form="exam-form" class="button button--small">Submit examination</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="exam-layout" data-exam-shell>
+        <aside class="exam-nav" aria-label="Question navigation">
+            <p>Questions</p>
+            <ol class="exam-nav-list">
+                <li th:each="question, questionStat : ${exam.questions()}">
+                    <a th:href="|#question-${questionStat.count}|" th:text="${questionStat.count}">1</a>
+                </li>
+            </ol>
+            <p class="small muted" style="margin-top:0.9rem;text-transform:none;letter-spacing:0;">
+                Your answers are marked on the server after you submit. You can revisit questions before then.
+            </p>
+        </aside>
+
+        <div>
+            <div class="alert" role="alert" th:if="${uploadError != null}" th:text="${uploadError}"></div>
+
+            <form id="exam-form" th:action="@{/exams/{id}/submit(id=${exam.attemptId()})}" method="post">
+                <fieldset class="exam-question" th:each="question, questionStat : ${exam.questions()}"
+                          th:id="|question-${questionStat.count}|">
+                    <legend>
+                        <span class="question-meta" style="margin-bottom:0.5rem;">
+                            <span th:text="|Question ${questionStat.count}|">Question 1</span>
+                            <span th:text="${#strings.replace(question.type(), '_', ' ')}">MULTIPLE CHOICE</span>
+                            <span th:text="${question.difficulty()}">MEDIUM</span>
+                            <span class="source-tag" th:if="${question.sourceReference() != null}"
+                                  th:text="${question.sourceReference()}">Page 5</span>
+                        </span>
+                        <span th:text="${question.prompt()}" style="display:block;font-weight:500;">Prompt</span>
+                    </legend>
+
+                    <div th:if="${question.type() == 'SHORT_ANSWER'}" style="margin-top:0.9rem;">
+                        <label class="small muted" th:for="|answer-${question.questionId()}|">Your answer</label>
+                        <textarea th:id="|answer-${question.questionId()}|"
+                                  th:name="|question-${question.questionId()}|"
+                                  rows="4" placeholder="Write a short answer."></textarea>
+                    </div>
+
+                    <div th:unless="${question.type() == 'SHORT_ANSWER'}" style="margin-top:0.9rem;">
+                        <label class="choice" th:each="option, optionStat : ${question.options()}">
+                            <input type="radio"
+                                   th:name="|question-${question.questionId()}|"
+                                   th:id="|q-${question.questionId()}-${optionStat.index}|"
+                                   th:value="${optionStat.index}">
+                            <span th:text="${option}">Option</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="exam-submit">
+                    <div class="button-row">
+                        <button type="submit" class="button">Submit examination</button>
+                        <span class="exam-warning">Submitting is final. You will see the score and explanations immediately.</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+<script th:src="@{/js/exam.js}" defer></script>
+</body>
+</html>

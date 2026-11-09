@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<nav th:fragment="studyNav(pack, active)" class="study-nav" aria-label="Study package sections">
+    <div class="study-nav-head">
+        <span class="eyebrow">Study package</span>
+        <p class="study-nav-title" th:text="${pack.title()}">Study package</p>
+        <p class="study-nav-doc" th:text="${pack.documentTitle()}">document.pdf</p>
+    </div>
+    <div class="study-nav-links">
+        <a th:href="@{/study/{id}(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'overview'} ? 'is-active'">Overview</a>
+        <a th:href="@{/study/{id}/topics(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'topics'} ? 'is-active'">
+            <span>Topics</span><span class="study-nav-count" th:text="${#lists.size(pack.topics())}">0</span>
+        </a>
+        <a th:href="@{/study/{id}/notes(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'notes'} ? 'is-active'">
+            <span>Revision notes</span><span class="study-nav-count" th:text="${#lists.size(pack.revisionNotes())}">0</span>
+        </a>
+        <a th:href="@{/study/{id}/definitions(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'definitions'} ? 'is-active'">
+            <span>Definitions</span><span class="study-nav-count" th:text="${#lists.size(pack.definitions())}">0</span>
+        </a>
+        <a th:href="@{/study/{id}/formulas(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'formulas'} ? 'is-active'">
+            <span>Formulas</span><span class="study-nav-count" th:text="${#lists.size(pack.formulas())}">0</span>
+        </a>
+        <a th:href="@{/study/{id}/flashcards(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'flashcards'} ? 'is-active'">
+            <span>Flashcards</span><span class="study-nav-count" th:text="${pack.flashcardCount()}">0</span>
+        </a>
+        <a th:href="@{/study/{id}/practice(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'practice'} ? 'is-active'">
+            <span>Practice questions</span><span class="study-nav-count" th:text="${pack.practiceQuestionCount()}">0</span>
+        </a>
+        <a th:href="@{/study/{id}/exam(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'exam'} ? 'is-active'">
+            <span>Mock examination</span><span class="study-nav-count" th:text="${pack.mockQuestionCount()}">0</span>
+        </a>
+        <a th:href="@{/study/{id}/tutor(id=${pack.studyPackId()})}"
+           th:classappend="${active == 'tutor'} ? 'is-active'">AI tutor</a>
+    </div>
+    <div class="study-nav-foot">
+        <form th:action="@{/study/{id}/delete(id=${pack.studyPackId()})}" method="post"
+              data-confirm="Delete this study package? Your uploaded document stays in your library.">
+            <button type="submit" class="link-button">Delete study package</button>
+        </form>
+    </div>
+</nav>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Sign in')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: publicNavbar}"></header>
+
+<main id="main" class="wrap">
+    <div class="auth-layout">
+        <div class="auth-aside">
+            <span class="eyebrow">Welcome back</span>
+            <h1>Return to your study workspace.</h1>
+            <p>Your documents, study packages, mock examination attempts and tutor conversations are waiting in the same place.</p>
+            <ul>
+                <li>Generate study material from your own notes and slides.</li>
+                <li>Sit timed mock examinations scored on the server.</li>
+                <li>Ask the tutor and see the source pages behind each answer.</li>
+            </ul>
+        </div>
+
+        <section class="auth-card" aria-labelledby="login-title">
+            <h2 id="login-title">Sign in</h2>
+            <p class="auth-sub">Use the email address you registered with.</p>
+
+            <div class="alert" role="alert" th:if="${param.error}">
+                That email address and password do not match an account.
+            </div>
+            <div class="notice" role="status" th:if="${param.registered != null or notice != null}">
+                <span th:if="${notice != null}" th:text="${notice}">Your account is ready.</span>
+                <span th:if="${notice == null}">Your account is ready. Sign in to start studying.</span>
+            </div>
+            <div class="alert" role="alert" th:if="${param.logout}">
+                You have been signed out.
+            </div>
+
+            <form th:action="@{/login}" method="post" novalidate>
+                <div class="field">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" name="email" autocomplete="email" required
+                           th:value="${param.email != null ? param.email[0] : ''}" placeholder="you@university.ac.za">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="button">Sign in</button>
+                    <a th:href="@{/register}">Create an account</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle})}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/documents}">Documents</a> / Study package</p>
+            <span class="eyebrow" th:text="${pack.documentTitle()}">document.pdf</span>
+            <h1 th:text="${pack.title()}">Study package</h1>
+            <div class="study-meta">
+                <span class="pill"
+                      th:classappend="${pack.status() == 'READY'} ? 'pill--ready' : (${pack.status() == 'FAILED'} ? 'pill--failed' : 'pill--busy')"
+                      th:text="${pack.status()}">READY</span>
+                <span th:if="${pack.language() != null}" th:text="|Notes in ${pack.language()}|">Notes in English</span>
+                <span th:if="${pack.academicLevel() != null}" th:text="${pack.academicLevel()}">Undergraduate</span>
+                <span th:if="${pack.examDateLabel() != null and !#strings.isEmpty(pack.examDateLabel())}"
+                      th:text="|Exam: ${pack.examDateLabel()}|">Exam date</span>
+                <span th:if="${pack.model() != null}" class="mono" th:text="${pack.model()}">gemini</span>
+            </div>
+        </div>
+
+        <!-- Generation in progress -->
+        <section id="generation-status" th:unless="${pack.ready()}"
+                 th:attr="data-study-pack-id=${pack.studyPackId()},data-status=${pack.status()}"
+                 class="panel" aria-live="polite">
+            <h2 th:if="${pack.status() == 'FAILED'}">Generation did not complete</h2>
+            <h2 th:unless="${pack.status() == 'FAILED'}">Building your study package</h2>
+
+            <div class="alert" role="alert" th:if="${pack.status() == 'FAILED'}"
+                 th:text="${pack.failureReason() != null ? pack.failureReason() : 'The generation failed.'}">
+                Failure reason
+            </div>
+
+            <th:block th:unless="${pack.status() == 'FAILED'}">
+                <p class="muted" id="generation-message"
+                   th:text="${pack.progressMessage() != null ? pack.progressMessage() : 'Queued for generation.'}">
+                    Reading the document material.
+                </p>
+                <div class="progress"><span id="generation-bar" style="width: 12%"></span></div>
+                <div class="progress-note">
+                    <span>You can leave this page; generation continues in the background.</span>
+                    <span id="generation-percent">Working</span>
+                </div>
+            </th:block>
+
+            <div class="button-row" th:if="${pack.status() == 'FAILED'}" style="margin-top:1.2rem;">
+                <a class="button" th:href="@{/documents}">Back to documents</a>
+                <a class="button button--secondary" th:href="@{/study/{id}(id=${pack.studyPackId()})}">Refresh status</a>
+            </div>
+        </section>
+
+        <!-- Ready package -->
+        <th:block th:if="${pack.ready()}">
+            <section class="panel" aria-labelledby="document-overview">
+                <div class="panel-head">
+                    <h2 id="document-overview">Document overview</h2>
+                    <a class="small" th:href="@{/documents}">Source document</a>
+                </div>
+                <p th:if="${pack.introduction() != null}" th:text="${pack.introduction()}" class="muted"></p>
+                <p th:if="${pack.overallSummary() != null}" th:text="${pack.overallSummary()}"
+                   style="color: var(--ink-soft);"></p>
+            </section>
+
+            <div class="grid grid--2" style="margin-top:1.4rem;">
+                <section class="panel" aria-labelledby="objectives">
+                    <h2 id="objectives" style="font-size:1.2rem;">Learning objectives</h2>
+                    <ul th:if="${!#lists.isEmpty(pack.learningObjectives())}">
+                        <li th:each="objective : ${pack.learningObjectives()}" th:text="${objective}">Objective</li>
+                    </ul>
+                    <p class="muted small" th:if="${#lists.isEmpty(pack.learningObjectives())}">No objectives were generated.</p>
+                </section>
+                <section class="panel" aria-labelledby="priorities">
+                    <h2 id="priorities" style="font-size:1.2rem;">Revise these first</h2>
+                    <ul th:if="${!#lists.isEmpty(pack.revisionPriorities())}">
+                        <li th:each="priority : ${pack.revisionPriorities()}" th:text="${priority}">Priority</li>
+                    </ul>
+                    <p class="muted small" th:if="${#lists.isEmpty(pack.revisionPriorities())}">No revision priorities were generated.</p>
+                </section>
+            </div>
+
+            <section class="panel" aria-labelledby="inside" style="margin-top:1.4rem;">
+                <div class="panel-head">
+                    <h2 id="inside">Inside this package</h2>
+                </div>
+                <div class="grid grid--4">
+                    <div class="stat">
+                        <span class="stat-label">Topics</span>
+                        <span class="stat-value" th:text="${#lists.size(pack.topics())}">0</span>
+                        <a class="small" th:href="@{/study/{id}/topics(id=${pack.studyPackId()})}">Review topics</a>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Notes</span>
+                        <span class="stat-value" th:text="${#lists.size(pack.revisionNotes())}">0</span>
+                        <a class="small" th:href="@{/study/{id}/notes(id=${pack.studyPackId()})}">Read notes</a>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Flashcards</span>
+                        <span class="stat-value" th:text="${pack.flashcardCount()}">0</span>
+                        <a class="small" th:href="@{/study/{id}/flashcards(id=${pack.studyPackId()})}">Start recall</a>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Questions</span>
+                        <span class="stat-value" th:text="${pack.practiceQuestionCount()}">0</span>
+                        <a class="small" th:href="@{/study/{id}/practice(id=${pack.studyPackId()})}">Practise</a>
+                    </div>
+                </div>
+                <p class="small muted" style="margin:1rem 0 0;">
+                    Generated from your uploaded document. Source references point to the page or slide where the
+                    material appears. Always compare with your original notes before relying on a definition.
+                </p>
+            </section>
+        </th:block>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+<script th:src="@{/js/study.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — Mock examination')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / Mock examination</p>
+            <h1>Mock examination</h1>
+            <p class="muted">A timed paper built from this document. Multiple choice and true/false questions are scored automatically; short answers are reviewed against a suggested answer.</p>
+        </div>
+
+        <section class="panel" aria-labelledby="start-exam">
+            <h2 id="start-exam" style="font-size:1.25rem;">Start a new attempt</h2>
+            <p class="small muted" th:text="|${pack.mockQuestionCount()} questions available · ${pack.documentTitle()}|">10 questions available</p>
+            <form th:action="@{/study/{id}/mock-exams(id=${pack.studyPackId()})}" method="post"
+                  onsubmit="return confirm('Start the examination now? The timer begins immediately.');">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="durationMinutes">Examination duration</label>
+                        <select id="durationMinutes" name="durationMinutes">
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="button">Begin examination</button>
+                    <span class="small muted">Answers are not visible to your browser until you submit.</span>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel" aria-labelledby="previous-attempts" style="margin-top:1.4rem;">
+            <h2 id="previous-attempts" style="font-size:1.2rem;">Previous attempts</h2>
+            <div class="empty" th:if="${#lists.isEmpty(attempts)}">
+                <h3>No attempts yet</h3>
+                <p>Your scores and time taken will appear here after your first submission.</p>
+            </div>
+            <div class="table-wrap" th:unless="${#lists.isEmpty(attempts)}">
+                <table class="data">
+                    <thead>
+                    <tr>
+                        <th scope="col">Submitted</th>
+                        <th scope="col">Score</th>
+                        <th scope="col">Correct</th>
+                        <th scope="col">Time taken</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="attempt : ${attempts}">
+                        <td th:text="${attempt.submittedAtLabel()}">1 Nov 2026</td>
+                        <td><strong th:text="|${attempt.scorePercent()}%|">80%</strong></td>
+                        <td th:text="|${attempt.correctCount()} / ${attempt.gradableQuestions()}|">8 / 10</td>
+                        <td th:text="${attempt.durationLabel()}">12 min</td>
+                        <td class="actions">
+                            <a class="small" th:href="@{/exams/{id}/results(id=${attempt.attemptId()})}">Review answers</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>

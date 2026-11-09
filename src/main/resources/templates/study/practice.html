@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(${pageTitle} + ' — Practice questions')}"></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header th:replace="~{layout/base :: appNavbar(${activeNav})}"></header>
+<div th:replace="~{layout/base :: flash}"></div>
+
+<main id="main" class="wrap study-layout">
+    <div th:replace="~{study/layout :: studyNav(${pack}, ${activeSection})}"></div>
+    <div class="study-main">
+        <div class="study-header">
+            <p class="breadcrumb"><a th:href="@{/study/{id}(id=${pack.studyPackId()})}">Overview</a> / Practice questions</p>
+            <h1>Practice questions</h1>
+            <p class="muted">Attempt each question before revealing the answer. Practice questions do not affect your examination score.</p>
+        </div>
+
+        <div class="empty" th:if="${#lists.isEmpty(questions)}">
+            <h3>No practice questions in this package</h3>
+            <p>Regenerate the study package to create a new question set.</p>
+        </div>
+
+        <article class="question-card" th:each="question, questionStat : ${questions}">
+            <div class="question-meta">
+                <span th:text="|Question ${questionStat.count}|">Question 1</span>
+                <span th:text="${#strings.replace(question.type(), '_', ' ')}">MULTIPLE CHOICE</span>
+                <span th:text="${question.difficulty()}">MEDIUM</span>
+                <span class="source-tag" th:if="${question.sourceReference() != null}"
+                      th:text="${question.sourceReference()}">Page 5</span>
+            </div>
+            <p class="question-prompt" th:text="${question.prompt()}">Question prompt</p>
+
+            <ol class="option-list" th:if="${!#lists.isEmpty(question.options())}">
+                <li th:each="option : ${question.options()}" th:text="${option}">Option</li>
+            </ol>
+
+            <details class="answer">
+                <summary>Show suggested answer</summary>
+                <div class="answer-body">
+                    <strong class="answer-key" th:text="${question.correctAnswer()}">Answer</strong>
+                    <p th:if="${question.explanation() != null}" th:text="${question.explanation()}">Explanation</p>
+                    <p class="small muted" th:if="${question.type() == 'SHORT_ANSWER'}">
+                        Short answers are marked by you. Compare your response with the suggested answer above.
+                    </p>
+                </div>
+            </details>
+        </article>
+
+        <div class="button-row" style="margin-top:1.4rem;" th:unless="${#lists.isEmpty(questions)}">
+            <a class="button" th:href="@{/study/{id}/exam(id=${pack.studyPackId()})}">Try a timed mock examination</a>
+            <a class="button button--secondary" th:href="@{/study/{id}/flashcards(id=${pack.studyPackId()})}">Back to flashcards</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/base :: footer}"></footer>
+<th:block th:replace="~{layout/base :: scripts}"></th:block>
+</body>
+</html>
